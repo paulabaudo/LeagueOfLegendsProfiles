@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">League Of Legens Profiles</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="edit_text_summoner_hint">Enter summoner name</string>
+    <string name="button_get_matches">Get matches!</string>
+    <string name="getting_champions_for_summoner">Getting champions for summoner %s</string>
+
+</resources>
