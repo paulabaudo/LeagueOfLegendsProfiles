@@ -57,7 +57,7 @@ public class LolProfilesFragment extends Fragment {
         return rootView;
     }
 
-    class FetchReposTask extends AsyncTask<String, Void, String> { //CAMBIAR
+    class FetchReposTask extends AsyncTask<String, Void, String> {
 
         final static String API_KEY = "?api_key=e1452383-1e5a-4842-a15d-f89568f612af";
         final static String RIOT_BASE_URL = "na.api.pvp.net";
@@ -252,7 +252,7 @@ public class LolProfilesFragment extends Fragment {
             return response;
         }
 
-        private URL constructURLSummonerIdQuery(String summoner) throws MalformedURLException { //CAMBIAR
+        private URL constructURLSummonerIdQuery(String summoner) throws MalformedURLException {
             Uri.Builder builder = new Uri.Builder();
             builder.scheme("https").authority(RIOT_BASE_URL).
                     appendPath(API_PATH).
