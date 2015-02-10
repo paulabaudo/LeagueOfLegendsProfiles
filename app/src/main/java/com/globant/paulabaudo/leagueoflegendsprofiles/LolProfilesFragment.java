@@ -82,7 +82,7 @@ public class LolProfilesFragment extends Fragment {
             if (params.length>0){
                 summoner = params[0];
             } else {
-                summoner = "Apuli"; //My summoner
+                summoner = "Hawk"; //My summoner
             }
             try {
                 URL urlSummonerId = constructURLSummonerIdQuery(summoner);
