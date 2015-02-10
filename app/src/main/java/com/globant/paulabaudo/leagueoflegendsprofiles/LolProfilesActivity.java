@@ -1,4 +1,4 @@
-package com.globant.paulabaudo.leagueoflegensprofiles;
+package com.globant.paulabaudo.leagueoflegendsprofiles;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package com.globant.paulabaudo.leagueoflegensprofiles;
+package com.globant.paulabaudo.leagueoflegendsprofiles;
 
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -51,8 +51,6 @@ public class LolProfilesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String summoner = mEditTextSummoner.getText().toString();
-                String message = String.format(getString(R.string.getting_champions_for_summoner), summoner);
-                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                 new FetchReposTask().execute(summoner);
             }
         });
@@ -62,10 +60,10 @@ public class LolProfilesFragment extends Fragment {
     class FetchReposTask extends AsyncTask<String, Void, String> { //CAMBIAR
 
         final static String API_KEY = "?api_key=e1452383-1e5a-4842-a15d-f89568f612af";
-        final static String RIOT_BASE_URL = "las.api.pvp.net";
+        final static String RIOT_BASE_URL = "na.api.pvp.net";
         final static String API_PATH = "api";
         final static String LOL_PATH = "lol";
-        final static String LAS_PATH = "las";
+        final static String NA_PATH = "na";
         final static String VERSION_MATCHHISTORY = "v2.2";
         final static String VERSION_SUMMONER = "v1.4";
         final static String VERSION_CHAMPION = "v1.2";
@@ -91,7 +89,7 @@ public class LolProfilesFragment extends Fragment {
                 HttpURLConnection httpURLSummonerIdConnection = (HttpURLConnection) urlSummonerId.openConnection();
                 try {
                     String responseIdSummoner = readFullResponse(httpURLSummonerIdConnection.getInputStream());
-                    idSummoner = parseResponseIdSummoner(responseIdSummoner);
+                    idSummoner = parseResponseIdSummoner(responseIdSummoner,summoner.toLowerCase());
                     List<Integer> championsHistory = getChampionsHistoryFromMatches(idSummoner);
                     listOfChampions = getChampions(championsHistory);
                 } catch (IOException e){
@@ -110,7 +108,7 @@ public class LolProfilesFragment extends Fragment {
             for (int championId : championsHistory){
                 champions.add(getChampionName(championId));
             }
-            return TextUtils.join(", ", champions);
+            return TextUtils.join(",\n", champions);
         }
 
         private String getChampionName(int championId) {
@@ -136,12 +134,8 @@ public class LolProfilesFragment extends Fragment {
             final String CHAMPION_NAME = "name";
             String name = "";
             try {
-                JSONArray responseJsonArray = new JSONArray(responseChampion);
-                JSONObject object;
-                for (int i = 0; i < responseJsonArray.length(); i++){
-                    object = responseJsonArray.getJSONObject(i);
-                    name = object.getString(CHAMPION_NAME);
-                }
+                JSONObject championObject = new JSONObject(responseChampion);
+                name = championObject.getString(CHAMPION_NAME);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -154,14 +148,15 @@ public class LolProfilesFragment extends Fragment {
                     appendPath(API_PATH).
                     appendPath(LOL_PATH).
                     appendPath(STATICDATA_PATH).
-                    appendPath(LAS_PATH).
+                    appendPath(NA_PATH).
                     appendPath(VERSION_CHAMPION).
                     appendPath(INFO_PATH_CHAMPION).
-                    appendPath(Integer.toString(championId)+API_KEY).
-                    appendPath(API_KEY);
+                    appendPath(Integer.toString(championId)+API_KEY);
             Uri uri = builder.build();
-            Log.d(LOG_TAG, "Built URI ChampionName: " + uri.toString());
-            return new URL(uri.toString());
+            String uriString = uri.toString().replace("%3F","?");
+            uriString = uriString.replace("%3D","=");
+            Log.d(LOG_TAG, "Built URI ChampionName: " + uriString);
+            return new URL(uriString);
         }
 
         private List<Integer> getChampionsHistoryFromMatches(int idSummoner) {
@@ -186,13 +181,17 @@ public class LolProfilesFragment extends Fragment {
         private List<Integer> parseResponseMatchHistory(String responseMatchHistory) {
             final String PARTICIPANTS = "participants";
             final String CHAMPIONID = "championId";
+            final String MATCHES = "matches";
             List<Integer> champions = new ArrayList<>();
             try {
-                JSONArray responseJsonArray = new JSONArray(responseMatchHistory);
-                JSONObject object;
-                for (int i = 0; i < responseJsonArray.length(); i++){
-                    object = responseJsonArray.getJSONObject(i);
-                    champions.add(object.getJSONObject(PARTICIPANTS).getInt(CHAMPIONID));
+                JSONObject matchesObject = new JSONObject(responseMatchHistory);
+                JSONArray matchesObjectArray = matchesObject.getJSONArray(MATCHES);
+                for (int i = 0; i < matchesObjectArray.length(); i++){
+                    JSONObject matchObject = matchesObjectArray.getJSONObject(i);
+                    JSONArray participantsArray = matchObject.getJSONArray(PARTICIPANTS);
+                    JSONObject participantObject = participantsArray.getJSONObject(0);
+                    Log.d(LOG_TAG,"Champion id:" + participantObject.getInt(CHAMPIONID));
+                    champions.add(participantObject.getInt(CHAMPIONID));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -205,30 +204,30 @@ public class LolProfilesFragment extends Fragment {
             builder.scheme("https").authority(RIOT_BASE_URL).
                     appendPath(API_PATH).
                     appendPath(LOL_PATH).
-                    appendPath(LAS_PATH).
+                    appendPath(NA_PATH).
                     appendPath(VERSION_MATCHHISTORY).
                     appendPath(INFO_PATH_MATCHHISTORY).
-                    appendPath(Integer.toString(idSummoner)+API_KEY).
-                    appendPath(API_KEY);
+                    appendPath(Integer.toString(idSummoner)+API_KEY);
             Uri uri = builder.build();
-            Log.d(LOG_TAG, "Built URI MatchHistory: " + uri.toString());
-            return new URL(uri.toString());
+            String uriString = uri.toString().replace("%3F","?");
+            uriString = uriString.replace("%3D","=");
+            Log.d(LOG_TAG, "Built URI MatchHistory: " + uriString);
+            return new URL(uriString);
         }
 
-        private int parseResponseIdSummoner(String responseIdSummoner) {
+        private int parseResponseIdSummoner(String responseIdSummoner,String summoner) {
             final String SUMMONER_ID = "id";
             int id = 0;
+            summoner = summoner.replace(" ","");
             try {
-                JSONArray responseJsonArray = new JSONArray(responseIdSummoner);
-                JSONObject object;
-                for (int i = 0; i < responseJsonArray.length(); i++){
-                    object = responseJsonArray.getJSONObject(i);
-                    id = object.getInt(SUMMONER_ID);
-                    Log.d(LOG_TAG, "Summoner id: "+id);
-                }
+                JSONObject object = new JSONObject(responseIdSummoner);
+                JSONObject summonerObject = object.getJSONObject(summoner);
+                id = summonerObject.getInt(SUMMONER_ID);
+                Log.d(LOG_TAG, "Summoner id: "+id);
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.d(LOG_TAG, "Summoner not found");
+                Toast.makeText(getActivity(), getString(R.string.summoner_not_found), Toast.LENGTH_SHORT).show();
             }
             return id;
         }
@@ -258,14 +257,16 @@ public class LolProfilesFragment extends Fragment {
             builder.scheme("https").authority(RIOT_BASE_URL).
                     appendPath(API_PATH).
                     appendPath(LOL_PATH).
-                    appendPath(LAS_PATH).
+                    appendPath(NA_PATH).
                     appendPath(VERSION_SUMMONER).
                     appendPath(INFO_PATH_SUMMONER).
                     appendPath(BY_NAME_PATH).
                     appendPath(summoner+API_KEY);
             Uri uri = builder.build();
-            Log.d(LOG_TAG, "Built URI SummonerId: " + uri.toString());
-            return new URL(uri.toString());
+            String uriString = uri.toString().replace("%3F","?");
+            uriString = uriString.replace("%3D","=");
+            Log.d(LOG_TAG, "Built URI SummonerId: " + uriString);
+            return new URL(uriString);
         }
     }
 }

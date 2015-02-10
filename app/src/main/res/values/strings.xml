@@ -7,5 +7,7 @@
     <string name="edit_text_summoner_hint">Enter summoner name</string>
     <string name="button_get_matches">Get matches!</string>
     <string name="getting_champions_for_summoner">Getting champions for summoner %s</string>
+    <string name="summoner_not_found">Summoner not found.</string>
+    <string name="text_view_champions_message">Champions used recently in ranked games...</string>
 
 </resources>

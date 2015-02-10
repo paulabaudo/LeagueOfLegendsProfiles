@@ -1,4 +1,4 @@
-package com.globant.paulabaudo.leagueoflegensprofiles;
+package com.globant.paulabaudo.leagueoflegendsprofiles;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
